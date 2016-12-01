@@ -1,0 +1,11 @@
+*.swp
+cscope.*
+tags
+*.so
+*.dll
+*.dylib
+*.dSYM/
+*.o
+/lv2.vst/
+/bundles
+/whitelist
