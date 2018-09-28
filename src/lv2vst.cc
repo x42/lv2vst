@@ -83,6 +83,10 @@ LV2Vst::LV2Vst (audioMasterCallback audioMaster, RtkLv2Description* desc)
 		_effect.flags |= (1 << 5);  // effFlagsProgramChunks;
 	}
 
+	if (get_category () == kPlugCategSynth) {
+		_effect.flags |= effFlagsIsSynth;
+	}
+
 	_lib_handle = open_lv2_lib (desc->dsp_path);
 	lv2_descriptor = (const LV2_Descriptor* (*)(uint32_t)) x_dlfunc (_lib_handle, "lv2_descriptor");
 
