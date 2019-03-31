@@ -34,11 +34,14 @@
 #include "lv2/lv2plug.in/ns/lv2core/lv2.h"
 #include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
 #include "lv2/lv2plug.in/ns/ext/atom/atom.h"
+#include "lv2/lv2plug.in/ns/ext/buf-size/buf-size.h"
 #include "lv2/lv2plug.in/ns/ext/event/event.h"
 #include "lv2/lv2plug.in/ns/ext/midi/midi.h"
+#include "lv2/lv2plug.in/ns/ext/options/options.h"
 #include "lv2/lv2plug.in/ns/ext/resize-port/resize-port.h"
 #include "lv2/lv2plug.in/ns/ext/state/state.h"
 #include "lv2/lv2plug.in/ns/ext/time/time.h"
+#include "lv2/lv2plug.in/ns/ext/parameters/parameters.h"
 #include "lv2/lv2plug.in/ns/ext/port-props/port-props.h"
 
 #include "lilv/lilv.h"
@@ -185,6 +188,7 @@ class LV2Parser
 		LilvNode* ext_causesArtifacts;
 		LilvNode* ext_notAutomatic;
 		LilvNode* lv2_enabled;
+		LilvNode* lv2_requiredOption;
 		LilvNode* lv2_InputPort;
 };
 
@@ -237,6 +241,7 @@ LV2Parser::LV2Parser (RtkLv2Description* d, char const* const* bundles)
 	ext_causesArtifacts = lilv_new_uri (world, LV2_PORT_PROPS__causesArtifacts);
 	ext_notAutomatic    = lilv_new_uri (world, LV2_PORT_PROPS__notAutomatic);
 	lv2_enabled         = lilv_new_uri (world, LV2_CORE_PREFIX "enabled");
+	lv2_requiredOption  = lilv_new_uri (world, LV2_OPTIONS__requiredOption);
 	lv2_InputPort       = lilv_new_uri (world, LILV_URI_INPUT_PORT);
 }
 
@@ -261,6 +266,7 @@ LV2Parser::~LV2Parser ()
 	lilv_node_free (ext_causesArtifacts);
 	lilv_node_free (ext_notAutomatic);
 	lilv_node_free (lv2_enabled);
+	lilv_node_free (lv2_requiredOption);
 	lilv_node_free (lv2_InputPort);
 	lilv_world_free (world);
 }
@@ -343,6 +349,29 @@ int LV2Parser::parse (const char* plugin_uri)
 		}
 	}
 	lilv_nodes_free(features);
+
+	if (err) {
+		return err;
+	}
+
+	uri = lilv_new_uri (world, plugin_uri);
+	LilvNodes* options = lilv_world_find_nodes (world, uri, lv2_requiredOption, NULL);
+	if (options) {
+		LILV_FOREACH(nodes, i, options) {
+			const char* ro = lilv_node_as_uri (lilv_nodes_get (options, i));
+			bool ok = false;
+			if (!strcmp (ro, LV2_PARAMETERS__sampleRate)) { ok = true; }
+			if (!strcmp (ro, LV2_BUF_SIZE__minBlockLength)) { ok = true; }
+			if (!strcmp (ro, LV2_BUF_SIZE__maxBlockLength)) { ok = true; }
+			if (!strcmp (ro, LV2_BUF_SIZE__sequenceSize)) { ok = true; }
+			if (!ok) {
+				fprintf (stderr, "Unsupported required option: '%s' in '%s'\n", ro, plugin_uri);
+				err = 1;
+			}
+		}
+	}
+	lilv_node_free (uri);
+	lilv_nodes_free(options);
 
 	if (err) {
 		return err;
