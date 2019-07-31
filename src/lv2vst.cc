@@ -846,6 +846,23 @@ void LV2Vst::process (float** inputs, float** outputs, int32_t n_samples)
 					memcpy (mev.midiData, (const uint8_t*)(ev+1), ev->body.size * sizeof (uint8_t));
 					send_events_to_host (&vev);
 				}
+				else if (ev->body.type == _uri.midi_MidiEvent && ev->body.size > 4) {
+					const uint8_t* data = (const uint8_t*)(ev+1);
+					if (data[0] == 0xf0 && data[1] == 0x7f && data[ev->body.size -1] == 0xf7) {
+						VstEvents vev;
+						vev.numEvents = 1;
+						VstMidiSysExEvent sev;
+						memset(&sev, 0, sizeof(VstMidiSysExEvent));
+						vev.events[0] = (VstEvent*) &sev;
+						sev.type = kVstSysExType;
+						sev.byteSize = sizeof (VstMidiSysExEvent);
+						sev.deltaFrames = ev->time.frames;
+						sev.dumpBytes = ev->body.size;
+						sev.sysexDump = (char*)data;
+						send_events_to_host (&vev);
+					}
+				}
+
 				ev = (LV2_Atom_Event const*) /* lv2_atom_sequence_next() */
 					((const uint8_t*)ev + sizeof (LV2_Atom_Event) + ((ev->body.size + 7) & ~7));
 			}

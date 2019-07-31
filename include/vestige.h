@@ -136,6 +136,7 @@
 
 #define kVstLangEnglish 1
 #define kVstMidiType 1
+#define kVstSysExType 6
 
 struct RemoteVstPlugin;
 
@@ -183,6 +184,20 @@ struct _VstMidiEvent
 };
 
 typedef struct _VstMidiEvent VstMidiEvent;
+
+struct _VstMidiSysExEvent
+{
+	int type;
+	int byteSize;
+	int deltaFrames;
+	int flags;
+	int dumpBytes;
+	void* reserved1;
+	char* sysexDump;
+	void* reserved2;
+};
+
+typedef struct _VstMidiSysExEvent VstMidiSysExEvent;
 
 
 struct _VstEvent
