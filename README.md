@@ -32,6 +32,11 @@ lv2vst can be deployed in different variants:
 *  wrap dedicated LV2 bundle(s), compile-time specified.
 *  wrap any/all LV2 Plugins(s), runtime lookup
 
+The first is intended for plugin-authors: A LV2 plugin can be
+seamlessly distributed as VST2.
+
+The second approach is useful for users who want to use
+existing LV2s in a VST plugin-host.
 
 Specifically:
 
@@ -62,6 +67,8 @@ The CRC32 of the LV2 URI is used as VST-ID.
 LV2VST does not bridge CPU architectures. The LV2 plugins and LV2VST
 architectures and ABIs need to match.
 
+A dedicated bundle (1), or dedicated whitelist (2) is preferred over
+blacklisting.
 
 Supported LV2 Features
 ----------------------
@@ -100,6 +107,18 @@ For macOS/OSX, a .vst bundle folder needs to be created, with the plugin in
 Contents/MacOS/, see `make osxbundle`.
 
 
+lv2vst can be used multiple-times in dedicated folders, each with specific
+whitelist to expose plugin-collections. e.g.
+
+```bash
+	mkdir -p ~/.vst/plugin-A/
+	mkdir -p ~/.vst/plugin-B/
+	cp lv2vst.so ~/.vst/plugin-A/
+	cp lv2vst.so ~/.vst/plugin-B/
+	lv2ls | grep URI-A-prefix > ~/.vst/plugin-A/.whitelist
+	lv2ls | grep URI-B-prefix > ~/.vst/plugin-B/.whitelist
+```
+
 Caveats
 -------
 
@@ -123,9 +142,7 @@ Yet others use static globals or expose all their symbols in the global namespac
 Most of these plugins will also cause crashes in other LV2 hosts. Except that LV2
 hosts don't generally instantiate a plugin unless it is used.
 
-A dedicated bundle or whitelist is generally preferable.
-
-lv2vst can be used multiple-times in dedicated folders, each with specific
-whitelist to expose plugin-collections (`lv2ls | grep URI-prefix > .../.whitelist`).
+Hence it is preferred to expose only specific plugins that are known to work
+reliably, using a whitelist.
 
 YMMV
