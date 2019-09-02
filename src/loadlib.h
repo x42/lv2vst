@@ -21,7 +21,7 @@
 
 typedef void (*VstVoidFunc)(void);
 VstVoidFunc x_dlfunc (void* handle, const char* symbol);
-void* open_lv2_lib (const char* lib_path);
+void* open_lv2_lib (const char* lib_path, bool persist = false);
 void close_lv2_lib (void*);
 
 const char* get_lib_path ();

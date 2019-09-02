@@ -60,7 +60,7 @@ endif
 
 PLUGIN_SRC= \
   src/instantiate.cc \
-  src/loadlib.c \
+  src/loadlib.cc \
   src/lv2ttl.cc \
   src/lv2vst.cc \
   src/lv2vstui.cc \

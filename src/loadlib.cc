@@ -32,10 +32,28 @@ static inline const char* dlerror(void) { return "Unknown error"; }
 
 #include "loadlib.h"
 
-void* open_lv2_lib (const char* lib_path)
+void* open_lv2_lib (const char* lib_path, bool persist)
 {
 	dlerror();
-	void* lib = dlopen (lib_path, RTLD_NOW);
+
+#ifndef _WIN32
+	int flags = RTLD_NOW;
+#endif
+
+#if ! (defined BUNDLES || defined _WIN32 || defined __APPLE__)
+	/* Linux, likely with system-wide, dynamically linked plugins.
+	 *
+	 * In many such cases unloading UI libs can cause issues
+	 * (e.g. re-initialize pango font-cache, re-use gobject, because
+	 * static variables are initialized when the object is reloaded).
+	 * To allows to work around this issue, by not unloading the module.
+	 */
+	if (persist) {
+		flags |= RTLD_NODELETE;
+	}
+#endif
+
+	void* lib = dlopen (lib_path, flags);
 	if (!lib) {
 		fprintf (stderr, "LV2Host: Failed to open library %s (%s)\n", lib_path, dlerror());
 		return NULL;
