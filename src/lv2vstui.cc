@@ -54,7 +54,7 @@ Lv2VstUI::Lv2VstUI (LV2Vst* effect)
 		return;
 	}
 
-	_lib_handle = open_lv2_lib (desc->gui_path);
+	_lib_handle = open_lv2_lib (desc->gui_path, true);
 	const LV2UI_Descriptor* (*lv2ui_descriptor)(uint32_t index) =
 		(const LV2UI_Descriptor* (*)(uint32_t)) x_dlfunc (_lib_handle, "lv2ui_descriptor");
 
