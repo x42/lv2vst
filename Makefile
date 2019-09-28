@@ -1,7 +1,7 @@
 PREFIX   ?= /usr/local
 LIBDIR   ?= lib
 VSTDIR   ?= $(PREFIX)/$(LIBDIR)/lxvst
-CXXFLAGS ?= -Wall
+CXXFLAGS ?= -Wall -Wno-parentheses
 LDFLAGS  ?=
 STRIP    ?= strip
 
