@@ -36,6 +36,14 @@ enum PortType {
 	ATOM_OUT
 };
 
+enum PluginCategory {
+	LV2_Uncategorized,
+	LV2_AnalyserPlugin,
+	LV2_InstrumentPlugin,
+	LV2_OscillatorPlugin,
+	LV2_SpatialPlugin,
+};
+
 struct LV2Port {
 	enum PortType porttype;
 
@@ -91,5 +99,7 @@ typedef struct _RtkLv2Description {
 
 	bool     send_time_info;
 	bool     has_state_interface;
+
+	PluginCategory category;
 } RtkLv2Description;
 #endif

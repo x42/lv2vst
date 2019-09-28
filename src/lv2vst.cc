@@ -342,7 +342,18 @@ int32_t LV2Vst::get_vendor_version ()
 
 VstPlugCategory LV2Vst::get_category ()
 {
-	// TODO -- map LV2 categories
+	switch (_desc->category) {
+		case LV2_AnalyserPlugin:
+			return kPlugCategAnalysis;
+		case LV2_InstrumentPlugin:
+			return kPlugCategSynth;
+		case LV2_OscillatorPlugin:
+			return kPlugCategGenerator;
+		case LV2_SpatialPlugin:
+			return kPlugCategSpacializer;
+		case LV2_Uncategorized:
+			break;
+	}
 	if (_desc->nports_audio_in == 0 && _desc->nports_midi_in == 0) {
 		return kPlugCategGenerator;
 	}
