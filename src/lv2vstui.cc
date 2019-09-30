@@ -47,6 +47,7 @@ Lv2VstUI::Lv2VstUI (LV2Vst* effect)
 	, _idle_iface (0)
 	, _atombuf (0)
 	, _lib_handle (0)
+	, _port_event_recursion (UINT32_MAX)
 {
 	RtkLv2Description const* desc = _lv2vst->desc ();
 
@@ -172,7 +173,9 @@ void Lv2VstUI::idle ()
 	while (_lv2vst->ctrl_to_ui.read_space () >= 1) {
 		LV2Vst::ParamVal pv;
 		_lv2vst->ctrl_to_ui.read (&pv, 1);
+		_port_event_recursion = pv.p;
 		plugin_gui->port_event (gui_instance, pv.p, sizeof (float), 0, &pv.v);
+		_port_event_recursion = UINT32_MAX;
 	}
 
 	const uint32_t portmap_atom_to_ui = _lv2vst->portmap_atom_to_ui ();
@@ -198,6 +201,10 @@ void Lv2VstUI::idle ()
 void
 Lv2VstUI::write_to_dsp (uint32_t port_index, uint32_t buffer_size, uint32_t port_protocol, const void* buffer)
 {
+	if (_port_event_recursion == port_index) {
+		return;
+	}
+
 	if (port_protocol != 0) {
 		if (_lv2vst->atom_from_ui.write_space () >= buffer_size + sizeof (LV2_Atom)) {
 			LV2_Atom a = {buffer_size, 0};

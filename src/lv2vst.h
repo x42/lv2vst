@@ -107,6 +107,7 @@ class Lv2VstUI : public VstGui
 		LV2_URID _uri_atom_EventTransfer;
 
 		void* _lib_handle;
+		uint32_t _port_event_recursion;
 };
 
 class LV2Vst : public VstPlugin
