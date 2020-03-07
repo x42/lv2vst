@@ -346,6 +346,7 @@ int LV2Parser::parse (const char* plugin_uri)
 			if (!strcmp (rf, "http://lv2plug.in/ns/ext/urid#unmap")) { ok = true; }
 			if (!strcmp (rf, "http://lv2plug.in/ns/ext/worker#schedule")) { ok = true; }
 			if (!strcmp (rf, "http://lv2plug.in/ns/ext/options#options")) { ok = true; }
+			if (!strcmp (rf, "http://lv2plug.in/ns/ext/buf-size#boundedBlockLength")) { ok = true; }
 			if (!ok) {
 				fprintf (stderr, "Unsupported required feature: '%s' in '%s'\n", rf, plugin_uri);
 				err = 1;

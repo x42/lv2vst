@@ -150,11 +150,13 @@ void LV2Vst::init ()
 	const LV2_Feature map_feature      = { LV2_URID__map, &uri_map};
 	const LV2_Feature unmap_feature    = { LV2_URID__unmap, &uri_unmap };
 	const LV2_Feature options_feature  = { LV2_OPTIONS__options, (void*)&options };
+	const LV2_Feature bounded_block_length_feature  = { LV2_BUF_SIZE__boundedBlockLength , NULL };
 
 	const LV2_Feature* features[] = {
 		&map_feature,
 		&unmap_feature,
 		&schedule_feature,
+		&bounded_block_length_feature,
 		&options_feature,
 		NULL
 	};
