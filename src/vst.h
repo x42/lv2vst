@@ -264,6 +264,11 @@ class VstPlugin
 			return (audioMaster (&_effect, audioMasterSizeWindow, width, height, 0, 0) != 0);
 		}
 
+		virtual bool product_string (char* ptr)
+		{
+			return audioMaster (&_effect, audioMasterGetProductString, 0, 0, ptr, 0);
+		}
+
 	protected:
 		audioMasterCallback audioMaster;
 		float    _sample_rate;

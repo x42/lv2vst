@@ -29,6 +29,7 @@
 #endif
 
 static const size_t midi_buf_size = 8192;
+static const size_t vst_max_product_str_len = 64;
 
 #include "lv2/lv2plug.in/ns/ext/buf-size/buf-size.h"
 #include "lv2/lv2plug.in/ns/ext/parameters/parameters.h"
@@ -477,7 +478,13 @@ void LV2Vst::get_parameter_name (int32_t i, char* label)
 {
 	const LV2Port* l = index_to_desc (i);
 	if (l) {
-		strncpyn (label, l->name, 8);
+		char product[vst_max_product_str_len];
+		product_string (product);
+		if (!strcmp ("REAPER", product)) {
+			strncpyn (label, l->name, 256);
+		} else {
+			strncpyn (label, l->name, 8);
+		}
 	}
 }
 
@@ -501,7 +508,13 @@ void LV2Vst::get_parameter_label (int32_t i, char* label)
 {
 	const LV2Port* l = index_to_desc (i);
 	if (l) {
-		strncpyn (label, l->doc, 8);
+		char product[vst_max_product_str_len];
+		product_string (product);
+		if (!strcmp ("REAPER", product)) {
+			strncpyn (label, l->doc, 256);
+		} else {
+			strncpyn (label, l->doc, 8);
+		}
 	}
 }
 
