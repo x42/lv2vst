@@ -44,7 +44,7 @@ class VstGui
 		virtual ~VstGui () {}
 
 		virtual bool get_rect (ERect** rect) = 0;
-		virtual bool open (void* ptr) = 0;
+		virtual bool open (void* ptr, float scale_factor) = 0;
 		virtual void close () = 0;
 		virtual bool is_open () const = 0;
 		virtual void idle () {}
@@ -62,6 +62,7 @@ class VstPlugin
 			, _block_size (8192)
 			, _n_params (_n_params)
 			, _editor (0)
+			, _ui_scale_factor (1.0f)
 		{
 			memset (&_effect, 0, sizeof (AEffect));
 			_effect.magic            = kEffectMagic;
@@ -117,7 +118,7 @@ class VstPlugin
 					if (_editor) { v = _editor->get_rect ((ERect**)ptr) ? 1 : 0; }
 					break;
 				case effEditOpen:
-					if (_editor) { v = _editor->open (ptr) ? 1 : 0; }
+					if (_editor) { v = _editor->open (ptr, _ui_scale_factor) ? 1 : 0; }
 					break;
 				case effEditClose:
 					if (_editor) { _editor->close (); }
@@ -166,6 +167,11 @@ class VstPlugin
 					break;
 				case effGetVstVersion:
 					v = 2400;
+					break;
+				case 50: // effVendorSpecific
+					if (index == CCONST ('P', 'r', 'e', 'S') && value == CCONST ('A', 'e', 'C', 's')) {
+						_ui_scale_factor = opt;
+					}
 					break;
 				default:
 #ifndef NDEBUG
@@ -266,6 +272,7 @@ class VstPlugin
 
 		VstGui*  _editor;
 		AEffect  _effect;
+		float    _ui_scale_factor;
 
 	private:
 		static intptr_t _dispatcher_ (AEffect* e, int32_t opcode, int32_t index, intptr_t value, void* ptr, float opt)

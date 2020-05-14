@@ -23,6 +23,12 @@
 #include "loadlib.h"
 #include "lv2vst.h"
 
+#include "lv2/lv2plug.in/ns/ext/parameters/parameters.h"
+
+#ifndef LV2_UI__scaleFactor
+#define LV2_UI__scaleFactor LV2_UI_PREFIX "scaleFactor"
+#endif
+
 static void write_function (
 		LV2UI_Controller controller,
 		uint32_t         port_index,
@@ -73,6 +79,7 @@ Lv2VstUI::Lv2VstUI (LV2Vst* effect)
 
 	_atombuf = (LV2_Atom_Sequence*) malloc (desc->min_atom_bufsiz * sizeof (uint8_t));
 	_uri_atom_EventTransfer = _lv2vst->map_uri (LV2_ATOM__eventTransfer);
+	_uri_atom_Float = _lv2vst->map_uri (LV2_ATOM__Float);
 
 	_rect.top = 0;
 	_rect.left = 0;
@@ -107,11 +114,14 @@ void Lv2VstUI::set_size (int width, int height) {
 	_lv2vst->size_window (width, height);
 }
 
-bool Lv2VstUI::open (void* ptr)
+bool Lv2VstUI::open (void* ptr, float scale_factor)
 {
 	if (!plugin_gui || gui_instance) {
 		return false;
 	}
+
+	_sample_rate = _lv2vst->get_sample_rate ();
+	_scale_factor = scale_factor;
 
 	uri_map.handle = _lv2vst->map_instance ();
 	uri_map.map = &Lv2UriMap::uri_to_id;
@@ -121,17 +131,28 @@ bool Lv2VstUI::open (void* ptr)
 	lv2ui_resize.handle = this;
 	lv2ui_resize.ui_resize = &Lv2VstUI::ui_resize;
 
+	/* options to pass to UI */
+	const LV2_Options_Option options[] = {
+		{ LV2_OPTIONS_INSTANCE, 0, _lv2vst->map_uri (LV2_PARAMETERS__sampleRate),
+			sizeof(float), _uri_atom_Float, &_sample_rate },
+		{ LV2_OPTIONS_INSTANCE, 0, _lv2vst->map_uri (LV2_UI__scaleFactor),
+			sizeof(float), _uri_atom_Float, &_scale_factor },
+		{ LV2_OPTIONS_INSTANCE, 0, 0, 0, 0, NULL }
+	};
+
 	const LV2_Feature resize_feature   = { LV2_UI__resize, &lv2ui_resize};
 	const LV2_Feature parent_feature   = { LV2_UI__parent, ptr};
 	const LV2_Feature map_feature      = { LV2_URID__map, &uri_map};
 	const LV2_Feature unmap_feature    = { LV2_URID__unmap, &uri_unmap };
 	const LV2_Feature instance_feature = { LV2_INSTANCE_ACCESS_URI, _lv2vst->plugin_instance ()};
+	const LV2_Feature options_feature  = { LV2_OPTIONS__options, (void*)&options };
 
 	const LV2_Feature* ui_features[] = {
 		&map_feature, &unmap_feature,
 		&resize_feature,
 		&parent_feature,
 		&instance_feature,
+		&options_feature,
 		NULL
 	};
 

@@ -368,6 +368,11 @@ VstPlugCategory LV2Vst::get_category ()
 	return kPlugCategUnknown;
 }
 
+float LV2Vst::get_sample_rate ()
+{
+	return _sample_rate;
+}
+
 /* state.cc implements
  * LV2Vst::get_chunk ();
  * LV2Vst::set_chunk ();

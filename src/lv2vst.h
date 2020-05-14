@@ -72,7 +72,7 @@ class Lv2VstUI : public VstGui
 		virtual ~Lv2VstUI ();
 
 		virtual bool get_rect (ERect** rect);
-		virtual bool open (void* ptr);
+		virtual bool open (void* ptr, float scale_factor);
 		virtual void close ();
 		virtual bool is_open () const;
 		virtual void idle ();
@@ -105,9 +105,14 @@ class Lv2VstUI : public VstGui
 		LV2UI_Idle_Interface* _idle_iface;
 		LV2_Atom_Sequence* _atombuf;
 		LV2_URID _uri_atom_EventTransfer;
+		LV2_URID _uri_atom_Float;
 
 		void* _lib_handle;
 		uint32_t _port_event_recursion;
+
+		// used for UI options
+		float _sample_rate;
+		float _scale_factor;
 };
 
 class LV2Vst : public VstPlugin
@@ -145,6 +150,7 @@ class LV2Vst : public VstPlugin
 		virtual int32_t bypass_plugin (bool bypass);
 
 		virtual VstPlugCategory get_category ();
+		virtual float get_sample_rate ();
 
 		virtual int32_t process_events (VstEvents* events);
 
