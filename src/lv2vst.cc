@@ -73,6 +73,7 @@ LV2Vst::LV2Vst (audioMasterCallback audioMaster, RtkLv2Description* desc)
 	, midi_buffer (midi_buf_size)
 	, _ui_sync (true)
 	, _active (false)
+	, _compat_mode (Strict)
 {
 	_effect.numInputs = _desc->nports_audio_in;
 	_effect.numOutputs = _desc->nports_audio_out;
@@ -125,6 +126,14 @@ LV2Vst::LV2Vst (audioMasterCallback audioMaster, RtkLv2Description* desc)
 
 void LV2Vst::init ()
 {
+	memset (_vsthost_product_str, 0, sizeof(_vsthost_product_str));
+	product_string (_vsthost_product_str);
+
+	if (!strcmp ("REAPER", _vsthost_product_str)) {
+		_compat_mode = Juicy;
+	} else {
+		_compat_mode = Strict;
+	}
 
 	_uri.atom_Float           = _map.uri_to_id (LV2_ATOM__Float);
 	_uri.atom_Int             = _map.uri_to_id (LV2_ATOM__Int);
@@ -478,12 +487,14 @@ void LV2Vst::get_parameter_name (int32_t i, char* label)
 {
 	const LV2Port* l = index_to_desc (i);
 	if (l) {
-		char product[vst_max_product_str_len];
-		product_string (product);
-		if (!strcmp ("REAPER", product)) {
-			strncpyn (label, l->name, 256);
-		} else {
-			strncpyn (label, l->name, 8);
+		switch (_compat_mode) {
+			case Juicy:
+				strncpyn (label, l->name, 256);
+				break;
+			default:
+			case Strict:
+				strncpyn (label, l->name, 8);
+				break;
 		}
 	}
 }
@@ -508,12 +519,14 @@ void LV2Vst::get_parameter_label (int32_t i, char* label)
 {
 	const LV2Port* l = index_to_desc (i);
 	if (l) {
-		char product[vst_max_product_str_len];
-		product_string (product);
-		if (!strcmp ("REAPER", product)) {
-			strncpyn (label, l->doc, 256);
-		} else {
-			strncpyn (label, l->doc, 8);
+		switch (_compat_mode) {
+			case Juicy:
+				strncpyn (label, l->doc, 256);
+				break;
+			default:
+			case Strict:
+				strncpyn (label, l->doc, 8);
+				break;
 		}
 	}
 }

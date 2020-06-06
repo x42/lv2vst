@@ -244,6 +244,14 @@ class LV2Vst : public VstPlugin
 		bool _active;
 		VstTimeInfo _ti;
 
+		char _vsthost_product_str[64];
+
+		/* VST host compat (set from product-string) */
+		enum VSTSpecCompat {
+			Strict, ///< 8 chars per label
+			Juicy ///< 256 chars (JUCE, Reaper)
+		} _compat_mode;
+
 		void* _lib_handle;
 		const LV2_Descriptor* (*lv2_descriptor)(uint32_t index);
 };
